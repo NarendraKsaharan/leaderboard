@@ -64,7 +64,7 @@
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->full_name }}</td>
                     <td>{{ $user->total_points }}</td>
-                    <td>{{ $user->rank }}</td>
+                    <td>#{{ $user->rank }}</td>
                 </tr>
                 @empty
                 <tr>

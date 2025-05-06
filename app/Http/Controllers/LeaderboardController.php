@@ -14,17 +14,19 @@ class LeaderboardController extends Controller
         try {
             $query = User::with('activities');
 
-            if ($request->has('search') && $request->search) {
-                $query->where('id', $request->search);
+            $search = $request->search;
+            $filter = $request->filter ?? null;
+            $date = now();
+
+            if ($search) {
+                $query->where('id', $search);
             }
 
-            if ($request->has('filter') && $request->filter && !empty($request->filter)) {
-                $filter = $request->filter;
-                $date = now();
+            if ($filter) {
                 switch ($filter) {
                     case 'day':
                         $query->whereHas('activities', function($query) use ($date) {
-                            $query->whereRaw('DATE(performed_at) = ?', [$date->toDateString()]);
+                            $query->whereDate('performed_at', $date->toDateString());
                         });
                         break;
                     case 'month':
@@ -38,8 +40,6 @@ class LeaderboardController extends Controller
                             $query->whereYear('performed_at', $date->year);
                         });
                         break;
-                    default:
-                        break;
                 }
             }
 
@@ -48,8 +48,7 @@ class LeaderboardController extends Controller
                     if ($filter == 'day') {
                         $user->total_points = $user->activities
                             ->filter(function ($activity) use ($date) {
-                                $performedAt = \Carbon\Carbon::parse($activity->performed_at);
-                                return $performedAt->toDateString() === $date->toDateString();
+                                return \Carbon\Carbon::parse($activity->performed_at)->toDateString() === $date->toDateString();
                             })
                             ->sum('points');
                     } else {
@@ -78,6 +77,7 @@ class LeaderboardController extends Controller
             return redirect()->back()->with('error', 'Something went wrong!');
         }
     }
+
 
     public function recalculate()
     {
