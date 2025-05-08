@@ -37,6 +37,7 @@
 
                 <div class="col-md-4">
                     <select name="filter" class="form-select">
+                        <option value="">Select Period</option>
                         <option value="day" {{ request('filter') == 'day' ? 'selected' : '' }}>Today</option>
                         <option value="month" {{ request('filter') == 'month' ? 'selected' : '' }}>This Month</option>
                         <option value="year" {{ request('filter') == 'year' ? 'selected' : '' }}>This Year</option>

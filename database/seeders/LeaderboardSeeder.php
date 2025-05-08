@@ -14,15 +14,16 @@ class LeaderboardSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::with('activities')->get();
-        foreach ($users as $user) {
-            $user->total_points = $user->activities->sum('points');
-        }
+        // $users = User::with('activities')->get();
+        // foreach ($users as $user) {
+        //     $user->total_points = $user->activities->sum('points');
+        // }
         
-        $sorted = $users->sortByDesc('total_points')->values();
+        // $sorted = $users->sortByDesc('total_points')->values();
         
-        $prevPoints = null;
-        $rank = 0;
+        // $prevPoints = null;
+        // $rank = 0;
+        
         $users = User::with('activities')->get()
             ->map(function ($user) {
                 $user->total_points = $user->activities->sum('points');

@@ -16,8 +16,8 @@ class LeaderboardController extends Controller
 
             $search = $request->search;
             $filter = $request->filter ?? null;
+            
             $date = now();
-
             if ($search) {
                 $query->where('id', $search);
             }
@@ -44,20 +44,42 @@ class LeaderboardController extends Controller
             }
 
             $users = $query->get()
-                ->map(function ($user) use ($filter, $date) {
-                    if ($filter == 'day') {
-                        $user->total_points = $user->activities
-                            ->filter(function ($activity) use ($date) {
-                                return \Carbon\Carbon::parse($activity->performed_at)->toDateString() === $date->toDateString();
-                            })
-                            ->sum('points');
-                    } else {
-                        $user->total_points = $user->activities->sum('points');
-                    }
-                    return $user;
-                })
-                ->sortByDesc('total_points')
-                ->values();
+                    ->map(function ($user) use ($filter, $date) {
+                        switch ($filter) {
+                            case 'day':
+                                $user->total_points = $user->activities
+                                    ->filter(function ($activity) use ($date) {
+                                        return \Carbon\Carbon::parse($activity->performed_at)->toDateString() === $date->toDateString();
+                                    })
+                                    ->sum('points');
+                                break;
+
+                            case 'month':
+                                $user->total_points = $user->activities
+                                    ->filter(function ($activity) use ($date) {
+                                        return \Carbon\Carbon::parse($activity->performed_at)->month === $date->month &&
+                                            \Carbon\Carbon::parse($activity->performed_at)->year === $date->year;
+                                    })
+                                    ->sum('points');
+                                break;
+
+                            case 'year':
+                                $user->total_points = $user->activities
+                                    ->filter(function ($activity) use ($date) {
+                                        return \Carbon\Carbon::parse($activity->performed_at)->year === $date->year;
+                                    })
+                                    ->sum('points');
+                                break;
+
+                            default:
+                                $user->total_points = $user->activities->sum('points');
+                                break;
+                        }
+
+                        return $user;
+                    })
+                    ->sortByDesc('total_points')
+                    ->values();
 
             $prevPoints = null;
             $rank = 0;
